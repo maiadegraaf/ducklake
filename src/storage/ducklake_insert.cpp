@@ -16,11 +16,13 @@
 #include "duckdb/planner/operator/logical_create_table.hpp"
 #include "duckdb/planner/parsed_data/bound_create_table_info.hpp"
 #include "duckdb/planner/expression/bound_cast_expression.hpp"
+#include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_reference_expression.hpp"
 #include "duckdb/common/multi_file/multi_file_reader.hpp"
 #include "duckdb/main/extension_helper.hpp"
 #include "duckdb/function/function_binder.hpp"
 #include "duckdb/planner/operator/logical_projection.hpp"
+#include "duckdb/planner/binder.hpp"
 
 namespace duckdb {
 
@@ -205,7 +207,7 @@ SinkResultType DuckLakeInsert::Sink(ExecutionContext &context, DataChunk &chunk,
 //===--------------------------------------------------------------------===//
 // GetData
 //===--------------------------------------------------------------------===//
-SourceResultType DuckLakeInsert::GetData(ExecutionContext &context, DataChunk &chunk,
+SourceResultType DuckLakeInsert::GetDataInternal(ExecutionContext &context, DataChunk &chunk,
                                          OperatorSourceInput &input) const {
 	auto &global_state = sink_state->Cast<DuckLakeInsertGlobalState>();
 	auto value = Value::BIGINT(NumericCast<int64_t>(global_state.total_insert_count));
@@ -250,7 +252,7 @@ CopyFunctionCatalogEntry &DuckLakeFunctions::GetCopyFunction(ClientContext &cont
 	// name), but that do not offer enough control
 	auto &db = *context.db;
 	string extension_name = ExtensionHelper::FindExtensionInEntries(name, EXTENSION_COPY_FUNCTIONS);
-	if (!extension_name.empty() && db.config.options.autoload_known_extensions &&
+	if (!extension_name.empty() && Settings::Get<AutoloadKnownExtensionsSetting>(context) &&
 	    ExtensionHelper::CanAutoloadExtension(extension_name)) {
 		// This will either succeed or throw
 		ExtensionHelper::AutoLoadExtension(db, extension_name);
