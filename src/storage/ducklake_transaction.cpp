@@ -2,6 +2,7 @@
 
 #include "common/ducklake_types.hpp"
 #include "common/ducklake_util.hpp"
+#include "duckdb/catalog/catalog_search_path.hpp"
 #include "duckdb/common/thread.hpp"
 #include "duckdb/common/types/uuid.hpp"
 #include "duckdb/main/attached_database.hpp"
