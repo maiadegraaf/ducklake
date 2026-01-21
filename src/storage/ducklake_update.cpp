@@ -11,6 +11,7 @@
 #include "duckdb/parallel/thread_context.hpp"
 #include "duckdb/parser/expression/cast_expression.hpp"
 #include "duckdb/planner/expression/bound_cast_expression.hpp"
+#include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_projection.hpp"
@@ -207,7 +208,7 @@ SinkFinalizeType DuckLakeUpdate::Finalize(Pipeline &pipeline, Event &event, Clie
 //===--------------------------------------------------------------------===//
 // GetData
 //===--------------------------------------------------------------------===//
-SourceResultType DuckLakeUpdate::GetData(ExecutionContext &context, DataChunk &chunk,
+SourceResultType DuckLakeUpdate::GetDataInternal(ExecutionContext &context, DataChunk &chunk,
                                          OperatorSourceInput &input) const {
 	auto &global_state = sink_state->Cast<DuckLakeUpdateGlobalState>();
 	auto value = Value::BIGINT(NumericCast<int64_t>(global_state.total_updated_count.load()));
